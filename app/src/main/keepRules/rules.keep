@@ -10,3 +10,6 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Suppress R8 warning for compile-only Lombok @Generated annotations in EvalEx
+-dontwarn lombok.Generated

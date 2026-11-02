@@ -20,7 +20,7 @@ android {
     buildTypes {
         release {
             optimization {
-                enable = false
+                enable = true
             }
         }
     }
@@ -43,8 +43,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
     implementation(libs.androidx.compose.material.icons.extended)
+    testImplementation(libs.junit)
     implementation(libs.evalex)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.1"
+agp = "9.5.0"
 coreKtx = "1.19.0"
 evalex = "3.8.0"
 junit = "4.13.2"
@@ -9,11 +9,10 @@ lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 kotlin = "2.2.10"
 composeBom = "2026.02.01"
-material = "1.12.1"
 material3 = "1.4.0"
 
 [libraries]
-androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 evalex = { module = "com.ezylang:EvalEx", version.ref = "evalex" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
