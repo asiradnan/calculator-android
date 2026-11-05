@@ -1,13 +1,13 @@
 package com.asiradnan.calculator.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.TextAutoSize
@@ -62,17 +62,14 @@ fun Calculator(modifier: Modifier = Modifier) {
 
     Column(modifier) {
         Row(
-            Modifier
-                .fillMaxHeight(0.34f)
-                .fillMaxWidth(1f)
+            Modifier.weight(.34f)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(modifier = Modifier.fillMaxHeight(0.1f))
                 InterceptPlatformTextInput(
                     interceptor = { _, _ ->
                         awaitCancellation()
-                    }
-                ) {
+                    }) {
                     BoxWithConstraints(modifier = Modifier.fillMaxHeight(0.5f)) {
                         val textMeasurer = rememberTextMeasurer()
                         val density = LocalDensity.current
@@ -136,67 +133,66 @@ fun Calculator(modifier: Modifier = Modifier) {
                 )
             }
         }
-
-        KeyPad(keyPress = { text ->
-            var currentText = textFieldValue.text
-            when (text) {
-                "AC" -> {
-                    currentText = ""
-                    result = ""
-                    openBracketCount = 0
-                }
-
-                "BACKSPACE" -> {
-                    val lastChar = currentText.lastOrNull()
-                    if (lastChar == '(') openBracketCount -= 1
-                    else if (lastChar == ')') openBracketCount += 1
-                    currentText = currentText.dropLast(1)
-                }
-
-                "()" -> {
-                    if (openBracketCount == 0 || currentText.last() == '(' || currentText.last() in ops) {
-                        currentText += '('
-                        openBracketCount += 1
-                    } else {
-                        currentText += ')'
-                        openBracketCount -= 1
-                    }
-                }
-
-                "=" -> {
-                    if (openBracketCount == 0) {
-                        val cleanedText = currentText.replace('×', '*').replace('÷', '/')
-                        result = Expression(cleanedText)
-                            .evaluate()
-                            .numberValue
-                            .setScale(8, RoundingMode.HALF_UP)
-                            .stripTrailingZeros()
-                            .toString()
+        Box(Modifier
+            .weight(.66f)
+            .fillMaxWidth(), contentAlignment = Alignment.Center
+        ) {
+            KeyPad(modifier = Modifier.aspectRatio(4f / 5f), keyPress = { text ->
+                var currentText = textFieldValue.text
+                when (text) {
+                    "AC" -> {
+                        currentText = ""
+                        result = ""
+                        openBracketCount = 0
                     }
 
+                    "BACKSPACE" -> {
+                        val lastChar = currentText.lastOrNull()
+                        if (lastChar == '(') openBracketCount -= 1
+                        else if (lastChar == ')') openBracketCount += 1
+                        currentText = currentText.dropLast(1)
+                    }
+
+                    "()" -> {
+                        if (openBracketCount == 0 || currentText.last() == '(' || currentText.last() in ops) {
+                            currentText += '('
+                            openBracketCount += 1
+                        } else {
+                            currentText += ')'
+                            openBracketCount -= 1
+                        }
+                    }
+
+                    "=" -> {
+                        if (openBracketCount == 0) {
+                            val cleanedText = currentText.replace('×', '*').replace('÷', '/')
+                            result = Expression(cleanedText).evaluate().numberValue.setScale(
+                                8,
+                                RoundingMode.HALF_UP
+                            ).stripTrailingZeros().toString()
+                        }
+
+                    }
+
+                    else -> currentText += text[0]
                 }
 
-                else -> currentText += text[0]
-            }
-
-            textFieldValue = TextFieldValue(
-                text = currentText,
-                selection = TextRange(currentText.length)
-            )
-        })
+                textFieldValue = TextFieldValue(
+                    text = currentText, selection = TextRange(currentText.length)
+                )
+            })
+        }
     }
 }
 
 @Composable
 fun KeyPad(modifier: Modifier = Modifier, keyPress: (text: String) -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize(1f)
-            .padding(vertical = 2.dp),
-//            .background(color = Color.White),
-        verticalArrangement = Arrangement.SpaceAround
+        modifier = modifier.padding(4.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         KeyPadRow(
+            modifier = Modifier.weight(1f),
             firstText = "AC",
             secondText = "()",
             thirdText = "%",
@@ -204,6 +200,7 @@ fun KeyPad(modifier: Modifier = Modifier, keyPress: (text: String) -> Unit) {
             buttonClick = keyPress
         )
         KeyPadRow(
+            modifier = Modifier.weight(1f),
             firstText = "7",
             secondText = "8",
             thirdText = "9",
@@ -211,16 +208,25 @@ fun KeyPad(modifier: Modifier = Modifier, keyPress: (text: String) -> Unit) {
             buttonClick = keyPress
         )
         KeyPadRow(
-            firstText = "4", secondText = "5", thirdText = "6",
+            modifier = Modifier.weight(1f),
+            firstText = "4",
+            secondText = "5",
+            thirdText = "6",
             fourthText = "-",
             buttonClick = keyPress
         )
         KeyPadRow(
-            firstText = "1", secondText = "2", thirdText = "3",
+            modifier = Modifier.weight(1f),
+            firstText = "1",
+            secondText = "2",
+            thirdText = "3",
             fourthText = "+",
             buttonClick = keyPress
         )
-        LastRow(buttonClick = keyPress)
+        LastRow(
+            modifier = Modifier.weight(1f),
+            buttonClick = keyPress
+        )
     }
 }
 
@@ -234,34 +240,18 @@ fun KeyPadRow(
     buttonClick: (String) -> Unit = {}
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth(1f)
-            .padding(horizontal = 2.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        val modifier: Modifier = Modifier
-            .weight(1f)
-            .aspectRatio(1f)
+        val keyModifier: Modifier = Modifier.weight(1f).fillMaxHeight()
         Key(
-            modifier = modifier,
-            text = firstText,
-            buttonClick = { buttonClick(firstText) }
-        )
+            modifier =keyModifier, text = firstText, buttonClick = { buttonClick(firstText) })
         Key(
-            modifier = modifier,
-            text = secondText,
-            buttonClick = { buttonClick(secondText) }
-        )
+            modifier =keyModifier, text = secondText, buttonClick = { buttonClick(secondText) })
         Key(
-            modifier = modifier,
-            text = thirdText,
-            buttonClick = { buttonClick(thirdText) }
-        )
+            modifier =keyModifier, text = thirdText, buttonClick = { buttonClick(thirdText) })
         Key(
-            modifier = modifier,
-            text = fourthText,
-            buttonClick = { buttonClick(fourthText) }
-        )
+            modifier =keyModifier, text = fourthText, buttonClick = { buttonClick(fourthText) })
     }
 }
 
@@ -275,44 +265,29 @@ fun LastRow(
     buttonClick: (String) -> Unit = {}
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth(1f)
-            .padding(horizontal = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-
-        ) {
-        val modifier: Modifier = Modifier
-            .weight(1f)
-            .aspectRatio(1f)
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        val keyModifier: Modifier = Modifier.weight(1f).fillMaxHeight()
         Key(
-            modifier = modifier,
-            text = firstText,
-            buttonClick = { buttonClick(firstText) }
-        )
+            modifier = keyModifier, text = firstText, buttonClick = { buttonClick(firstText) })
         Key(
-            modifier = modifier,
-            text = secondText,
-            buttonClick = { buttonClick(secondText) }
-        )
+            modifier = keyModifier, text = secondText, buttonClick = { buttonClick(secondText) })
         Button(
             onClick = { buttonClick("BACKSPACE") },
-            modifier = modifier,
+            modifier = keyModifier,
         ) {
             Icon(thirdIcon, contentDescription = null)
         }
         Key(
-            modifier = modifier,
-            text = fourthText,
-            buttonClick = { buttonClick(fourthText) }
-        )
+            modifier = keyModifier, text = fourthText, buttonClick = { buttonClick(fourthText) })
     }
 }
 
 @Composable
 fun Key(modifier: Modifier = Modifier, text: String, buttonClick: () -> Unit) {
     Button(
-        onClick = buttonClick,
-        modifier = modifier
+        onClick = buttonClick, modifier = modifier
     ) {
         Text(text = text, fontSize = if (text in ops || text == "()") 40.sp else 28.sp)
     }
