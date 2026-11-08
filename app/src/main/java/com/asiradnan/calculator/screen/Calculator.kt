@@ -180,7 +180,10 @@ fun Calculator(modifier: Modifier = Modifier) {
 
                     }
 
-                    else -> currentText += text[0]
+                    else -> {
+                        if (!(currentText.isNotEmpty() && currentText.last() in ops && text in ops))
+                            currentText += text[0]
+                    }
                 }
 
                 textFieldValue = TextFieldValue(
