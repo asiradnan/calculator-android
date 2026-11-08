@@ -166,10 +166,16 @@ fun Calculator(modifier: Modifier = Modifier) {
                     "=" -> {
                         if (openBracketCount == 0) {
                             val cleanedText = currentText.replace('×', '*').replace('÷', '/')
-                            result = Expression(cleanedText).evaluate().numberValue.setScale(
+                            try {
+                                result = Expression(cleanedText).evaluate().numberValue.setScale(
                                 8,
                                 RoundingMode.HALF_UP
                             ).stripTrailingZeros().toString()
+                            }
+                            catch (e: Exception){
+
+                            }
+
                         }
 
                     }
