@@ -170,16 +170,14 @@ fun Calculator(modifier: Modifier = Modifier) {
                                 result = Expression(cleanedText).evaluate().numberValue.setScale(
                                 8,
                                 RoundingMode.HALF_UP
-                            ).stripTrailingZeros().toString()
+                            ).stripTrailingZeros().toPlainString()
                             }
                             catch (e: Exception){
 
                             }
 
                         }
-
                     }
-
                     else -> {
                         if (!(currentText.isNotEmpty() && currentText.last() in ops && text in ops))
                             currentText += text[0]
