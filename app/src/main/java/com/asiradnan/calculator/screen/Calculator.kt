@@ -2,14 +2,17 @@ package com.asiradnan.calculator.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
@@ -17,8 +20,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,20 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.InterceptPlatformTextInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezylang.evalex.Expression
-import kotlinx.coroutines.awaitCancellation
 import java.math.RoundingMode
 
 const val ops = "+-×÷=%"
@@ -60,82 +54,47 @@ fun Calculator(modifier: Modifier = Modifier) {
         focusRequester.requestFocus()
     }
 
-    Column(modifier) {
-        Row(
-            Modifier.weight(.34f)
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        // Display Section
+        Column(
+            modifier = Modifier
+                .weight(0.35f)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Bottom
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(modifier = Modifier.fillMaxHeight(0.1f))
-                InterceptPlatformTextInput(
-                    interceptor = { _, _ ->
-                        awaitCancellation()
-                    }) {
-                    BoxWithConstraints(modifier = Modifier.fillMaxHeight(0.5f)) {
-                        val textMeasurer = rememberTextMeasurer()
-                        val density = LocalDensity.current
+            // Input Expression
+            Text(
+                text = textFieldValue.text.ifEmpty { "0" },
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+                softWrap = true,
+                autoSize = TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = 64.sp)
+            )
 
-                        // Dynamically scale font size down as text gets longer
-                        val fontSize = remember(textFieldValue.text, maxWidth) {
-                            var size = 80.sp
-                            val minSize = 28.sp
-                            val maxPx = with(density) { maxWidth.toPx() }
+            Spacer(modifier = Modifier.height(8.dp))
 
-                            if (textFieldValue.text.isNotEmpty()) {
-                                while (size > minSize) {
-                                    val textWidth = textMeasurer.measure(
-                                        text = textFieldValue.text,
-                                        style = TextStyle(fontSize = size)
-                                    ).size.width
-
-                                    if (textWidth < maxPx * 0.9) break
-                                    size = (size.value - 4).sp // Decrease step size
-                                }
-                            }
-                            size
-                        }
-
-                        TextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester),
-                            value = textFieldValue,
-                            onValueChange = { newValue -> textFieldValue = newValue },
-                            textStyle = TextStyle(
-                                fontSize = fontSize,
-                                textAlign = TextAlign.Right,
-                                color = MaterialTheme.colorScheme.onBackground
-                            ),
-                            singleLine = true,
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                errorContainerColor = Color.Transparent,
-                                focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = Color.Transparent
-                            )
-                        )
-                    }
-                }
-                Text(
-                    text = result,
-                    Modifier.fillMaxWidth(0.9f),
-                    textAlign = TextAlign.Right,
-//                    color = Color(0xFF6C6C70)
-                    color = MaterialTheme.colorScheme.secondary,
-                    maxLines = 1,
-                    softWrap = false,
-                    autoSize = TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = 36.sp),
-                )
-            }
+            // Result Preview
+            Text(
+                text = result,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.secondary,
+                maxLines = 1,
+                softWrap = false,
+                autoSize = TextAutoSize.StepBased(minFontSize = 14.sp, maxFontSize = 32.sp)
+            )
         }
-        Box(Modifier
-            .weight(.66f)
-            .fillMaxWidth(), contentAlignment = Alignment.Center
+
+        Box(
+            Modifier
+                .weight(.66f)
+                .fillMaxWidth(), contentAlignment = Alignment.Center
         ) {
             KeyPad(modifier = Modifier.aspectRatio(4f / 5f), keyPress = { text ->
                 var currentText = textFieldValue.text
@@ -168,16 +127,16 @@ fun Calculator(modifier: Modifier = Modifier) {
                             val cleanedText = currentText.replace('×', '*').replace('÷', '/')
                             try {
                                 result = Expression(cleanedText).evaluate().numberValue.setScale(
-                                8,
-                                RoundingMode.HALF_UP
-                            ).stripTrailingZeros().toPlainString()
-                            }
-                            catch (e: Exception){
+                                    8,
+                                    RoundingMode.HALF_UP
+                                ).stripTrailingZeros().toPlainString()
+                            } catch (e: Exception) {
 
                             }
 
                         }
                     }
+
                     else -> {
                         if (!(currentText.isNotEmpty() && currentText.last() in ops && text in ops))
                             currentText += text[0]
@@ -250,15 +209,17 @@ fun KeyPadRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        val keyModifier: Modifier = Modifier.weight(1f).fillMaxHeight()
+        val keyModifier: Modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
         Key(
-            modifier =keyModifier, text = firstText, buttonClick = { buttonClick(firstText) })
+            modifier = keyModifier, text = firstText, buttonClick = { buttonClick(firstText) })
         Key(
-            modifier =keyModifier, text = secondText, buttonClick = { buttonClick(secondText) })
+            modifier = keyModifier, text = secondText, buttonClick = { buttonClick(secondText) })
         Key(
-            modifier =keyModifier, text = thirdText, buttonClick = { buttonClick(thirdText) })
+            modifier = keyModifier, text = thirdText, buttonClick = { buttonClick(thirdText) })
         Key(
-            modifier =keyModifier, text = fourthText, buttonClick = { buttonClick(fourthText) })
+            modifier = keyModifier, text = fourthText, buttonClick = { buttonClick(fourthText) })
     }
 }
 
@@ -275,7 +236,9 @@ fun LastRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        val keyModifier: Modifier = Modifier.weight(1f).fillMaxHeight()
+        val keyModifier: Modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
         Key(
             modifier = keyModifier, text = firstText, buttonClick = { buttonClick(firstText) })
         Key(
@@ -283,8 +246,13 @@ fun LastRow(
         Button(
             onClick = { buttonClick("BACKSPACE") },
             modifier = keyModifier,
+            contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(thirdIcon, contentDescription = null)
+            Icon(
+                imageVector = thirdIcon,
+                contentDescription = "Backspace",
+                modifier = Modifier.size(24.dp)
+            )
         }
         Key(
             modifier = keyModifier, text = fourthText, buttonClick = { buttonClick(fourthText) })
@@ -292,10 +260,21 @@ fun LastRow(
 }
 
 @Composable
-fun Key(modifier: Modifier = Modifier, text: String, buttonClick: () -> Unit) {
+fun Key(
+    modifier: Modifier = Modifier,
+    text: String,
+    buttonClick: () -> Unit
+) {
     Button(
-        onClick = buttonClick, modifier = modifier
+        onClick = buttonClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(0.dp)
     ) {
-        Text(text = text, fontSize = if (text in ops || text == "()") 40.sp else 28.sp)
+        Text(
+            text = text,
+            fontSize = if (text in ops || text == "()") 26.sp else 22.sp,
+            maxLines = 1,
+            softWrap = false
+        )
     }
 }
