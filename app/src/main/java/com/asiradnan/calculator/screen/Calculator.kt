@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +32,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -49,7 +51,7 @@ fun Calculator(modifier: Modifier = Modifier) {
         mutableStateOf(TextFieldValue(text = "", selection = TextRange(0)))
     }
     var result by remember { mutableStateOf("") }
-    var openBracketCount = 0;
+    var openBracketCount by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -57,7 +59,6 @@ fun Calculator(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        // Display Section
         Column(
             modifier = Modifier
                 .weight(0.35f)
@@ -66,10 +67,11 @@ fun Calculator(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Bottom
         ) {
-            // Input Expression
             Text(
                 text = textFieldValue.text.ifEmpty { "0" },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("expression"),
                 textAlign = TextAlign.End,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
@@ -79,10 +81,11 @@ fun Calculator(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Result Preview
             Text(
                 text = result,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("result"),
                 textAlign = TextAlign.End,
                 color = MaterialTheme.colorScheme.secondary,
                 maxLines = 1,
@@ -124,7 +127,10 @@ fun Calculator(modifier: Modifier = Modifier) {
 
                     "=" -> {
                         if (openBracketCount == 0) {
-                            val cleanedText = currentText.replace('×', '*').replace('÷', '/')
+                            val cleanedText = currentText
+                                .replace('×', '*')
+                                .replace('÷', '/')
+                                .replace("%", "/100")
                             try {
                                 result = Expression(cleanedText).evaluate().numberValue.setScale(
                                     8,
